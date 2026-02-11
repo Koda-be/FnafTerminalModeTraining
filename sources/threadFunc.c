@@ -1,7 +1,7 @@
-#include "../headers/threadFunc.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include "threadFunc.h"
 
 void* GameThrFunc(void* argument)
 {

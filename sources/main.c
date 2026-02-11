@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
-#include "../headers/threadFunc.h"
+#include "threadFunc.h"
 
 int main()
 {
