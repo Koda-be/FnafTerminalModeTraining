@@ -14,3 +14,10 @@ void* GameThrFunc(void* argument)
 
     pthread_exit((void*) result);
 }
+
+void* AnimatronicThrFunc(void* argument)
+{
+    
+
+    pthread_exit(NULL);
+}
