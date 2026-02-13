@@ -2,14 +2,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
-#include <signal.h>
+//#include <signal.h>
 #include "threadFunc.h"
-#include "global.h"
-
-void handlerSIGUSR1(int sig)
-{
-    gameState = 0;
-}
 
 int main()
 {
@@ -28,12 +22,12 @@ int main()
         puts("\nValue not in valid range");
     }while(1);
     
-    struct sigaction action;
+    /*struct sigaction action;
     action.sa_handler = handlerSIGUSR1;
     action.sa_flags = 0;
     sigemptyset(&(action.sa_mask));
 
-    sigaction(SIGUSR1, &action, NULL);
+    sigaction(SIGUSR1, &action, NULL);*/
 
     pthread_t gameThr;
     if(pthread_create(&gameThr, NULL, GameThrFunc, (void*) night))

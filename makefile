@@ -17,7 +17,7 @@ $(OBJS)/room.o:			$(SOURCES)/room.c
 						$(COMP) $(SOURCES)/room.c -c -o $(OBJS)/room.o
 
 clean:
-		rm -f $(OBJS)/*
+			rm -f $(OBJS)/*
 
 clobber:	clean
-			rm -f $(BIN)/*
+			mv $(BIN)/gamedata .; rm -f $(BIN)/*; mv gamedata $(BIN)

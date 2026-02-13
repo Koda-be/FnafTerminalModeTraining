@@ -6,9 +6,9 @@
 #include "animatronic.h"
 #include "ressources.h"
 
-Animatronic* createAnimatronic(Anim_Flag flag, Anim_Timer timer, Anim_Difficulty difficulty, int roomAmmount, RoomArray* roomArray, Room_ID startRoom, ...)
+Animatronic* createAnimatronic(Anim_Flag flag, Anim_Timer timer, Anim_Difficulty difficulty, Room* startRoom)
 {
-    Animatronic* animatronic = malloc(sizeof(Animatronic));
+    Animatronic* animatronic = calloc(1, sizeof(Animatronic));
 
     switch(flag)
     {
@@ -21,27 +21,8 @@ Animatronic* createAnimatronic(Anim_Flag flag, Anim_Timer timer, Anim_Difficulty
     animatronic->timer = timer;
     animatronic->difficulty = difficulty;
 
-    Room_ID* roomPtr = malloc(sizeof(Room_ID));
-    *roomPtr = STAGE;
-    animatronic->currRoom = searchRoom(roomArray, ID, (void*) roomPtr);
-    free(roomPtr);
-
-    animatronic->path = malloc((roomAmmount+1)*sizeof(Room*));
-
-    va_list roomList;
-    va_start(roomList, startRoom);
-
-    animatronic->path[0] = searchRoom(roomArray, ID, &(startRoom));
-
-    for(int i = 1; i <= roomAmmount; i++)
-    {
-        Room_ID id = va_arg(roomList, Room_ID);
-        animatronic->path[i] = searchRoom(roomArray, ID, (void*) &id);
-    }
-    
-    animatronic->path[roomAmmount+1] = NULL;
-    
-    va_end(roomList);
+    animatronic->currRoom = startRoom;
+    animatronic->startRoom = startRoom;
 
     printf("Created animatronic: ID = %s, room = %s, timer = %f\n", animatronic->id, animatronic->currRoom->name, animatronic->timer);
 
@@ -98,12 +79,11 @@ int checkMove(Animatronic* animatronic)
 
 void reinitialize(void* arg)
 {
-    ((Animatronic*) arg)->currRoom = ((Animatronic*) arg)->path[0];
+    ((Animatronic*) arg)->currRoom = ((Animatronic*) arg)->startRoom;
 
 }
 
 void destroyAnimatronic(Animatronic* animatronic)
 {
-    free(animatronic->path);
     free(animatronic);
 }

@@ -5,6 +5,16 @@
 #include "room.h"
 #include "ressources.h"
 
+Room* createRoom(Room_ID id)
+{
+    Room* room = calloc(1, sizeof(Room));
+    room->id = id;
+
+    setRoomName(room);
+
+    return room;
+}
+
 void setRoomName(Room* room)
 {
     switch(room->id)
@@ -116,21 +126,21 @@ void setTargetRooms(Target_Flag sec, Anim_Flag flag, Room* room, ...)
     }
     
     *targetRooms = malloc(2*(sizeof(Room*)));
-    (*targetRooms)[0] = room;
+
+    va_list roomPtr;
+    va_start(roomPtr, room);
+
+    (*targetRooms)[0] = va_arg(roomPtr, Room*);
 
     if(sec == SEC)
-    {
-        va_list roomPtr;
-        va_start(roomPtr, room);
-
         (*targetRooms)[1] = va_arg(roomPtr, Room*);
 
-        va_end(roomPtr);
+    else 
+        (*targetRooms)[1] = NULL;
 
-        return;
-    }
-    
-    (*targetRooms)[1] = NULL;
+    va_end(roomPtr);
+
+    return;
 }
 
 Room* searchRoom(RoomArray* roomArray, Search_Flag flag, void* arg)

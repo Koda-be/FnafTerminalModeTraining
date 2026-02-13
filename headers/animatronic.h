@@ -14,7 +14,7 @@ struct Animatronic
 
     // Position fields
     Room* currRoom;                         // Current location of the animatronic
-    Room** path;                            // Array of rooms the animatronic will go through
+    Room* startRoom;
 }; typedef struct Animatronic Animatronic;
 
 struct AnimRoomTuple
@@ -23,7 +23,7 @@ struct AnimRoomTuple
     Room* room;
 }; typedef struct AnimRoomTuple AnimRoomTuple;
 
-Animatronic* createAnimatronic(Anim_Flag flag, Anim_Timer timer, Anim_Difficulty difficulty, int roomAmmount, RoomArray* roomArray, Room_ID room, ...);
+Animatronic* createAnimatronic(Anim_Flag flag, Anim_Timer timer, Anim_Difficulty difficulty, Room* startRoom);
 int checkMove(Animatronic*);
 void move(Animatronic*);
 void reinitialize(void*);
