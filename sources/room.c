@@ -1,44 +1,148 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
 #include "room.h"
-#include "global.h"
+#include "ressources.h"
 
-extern char gameState;
-extern RoomArray roomArray;
-
-void setRoomName(Room* room, char* name)
+void setRoomName(Room* room)
 {
-    realloc(room->name, strlen(name)+1);
-    strcpy(room->name, name);
+    switch(room->id)
+    {
+        case STAGE:
+        {
+            room->name = malloc(strlen("Stage")+1);
+            strcpy(room->name, "Stage");
+        }
+
+        case MAINROOM:
+        {
+            room->name = malloc(strlen("Main Room")+1);
+            strcpy(room->name, "Main Room");
+        }
+
+        case PIRATECOVE:
+        {
+            room->name = malloc(strlen("Pirate Cove")+1);
+            strcpy(room->name, "Pirate Cove");
+        }
+
+        case LEFTCORR1:
+        {
+            room->name = malloc(strlen("Left Corridor 1")+1);
+            strcpy(room->name, "Left Corridor 1");
+        }
+
+        case LEFTCORR2:
+        {
+            room->name = malloc(strlen("Left Corridor 2")+1);
+            strcpy(room->name, "Left Corridor 2");
+        }
+
+        case RIGHTCORR1:
+        {
+            room->name = malloc(strlen("Right Corridor 1")+1);
+            strcpy(room->name, "Right Corridor 1");
+        }
+
+        case RIGHTCORR2:
+        {
+            room->name = malloc(strlen("Right Corridor 2")+1);
+            strcpy(room->name, "Right Corridor 2");
+        }
+
+        case LEFTCLOSET:
+        {
+            room->name = malloc(strlen("Left Closet")+1);
+            strcpy(room->name, "Left Closet");
+        }
+
+        case REPAIRROOM:
+        {
+            room->name = malloc(strlen("Repair Room")+1);
+            strcpy(room->name, "Repair Room");
+        }
+
+        case TOILETS:
+        {
+            room->name = malloc(strlen("Toilets")+1);
+            strcpy(room->name, "Toilets");
+        }
+
+        case KITCHEN:
+        {
+            room->name = malloc(strlen("Kitchen")+1);
+            strcpy(room->name, "Kitchen");
+        }
+
+        case SECURITYROOM:
+        {
+            room->name = malloc(strlen("Security Room")+1);
+            strcpy(room->name, "Security Room");
+        }
+
+        default:
+        {
+            room->name = malloc(strlen("/")+1);
+            strcpy(room->name, "/");
+        }
+    }
 }
 
-void setAdjRooms(int nbr, Target_Flag flag, Room* room, ...)
+void setTargetRooms(Target_Flag sec, Anim_Flag flag, Room* room, ...)
 {
-    Room*** adjRooms = (flag ? &(room->adjMainRooms) : &(room->adjSecRooms));
+    Room*** targetRooms = NULL;
 
-    va_list roomPtr;
-    va_start(roomPtr, room);
+    switch(flag)
+    {
+        case BONNIE:
+            targetRooms = &(room->targetRoomsBonnie);
+            break;
+
+        case CHICA:
+            targetRooms = &(room->targetRoomsChica);
+            break;
+        
+        case FREDDY:
+            targetRooms = &(room->targetRoomsFreddy);
+            break;
+        
+        case FOXY:
+            targetRooms = &(room->targetRoomsFoxy);
+            break;
+
+        default:
+            printf("Invalid flag in setTargetRooms(): %d", flag);
+    }
     
-    *adjRooms = malloc((nbr+1)*(sizeof(Room*)));
-    for(int i = 0; i < nbr; i++)
-        (*adjRooms)[i] = va_arg(roomPtr, Room*);
+    *targetRooms = malloc(2*(sizeof(Room*)));
+    (*targetRooms)[0] = room;
 
-    (*adjRooms)[nbr] = NULL;
+    if(sec == SEC)
+    {
+        va_list roomPtr;
+        va_start(roomPtr, room);
 
-    va_end(roomPtr);
+        (*targetRooms)[1] = va_arg(roomPtr, Room*);
+
+        va_end(roomPtr);
+
+        return;
+    }
+    
+    (*targetRooms)[1] = NULL;
 }
 
-Room* searchRoom(Search_Flag flag, void* arg)
+Room* searchRoom(RoomArray* roomArray, Search_Flag flag, void* arg)
 {
     if(flag)
-        for(int i = 0; i < roomArray.size; i++)
-            if(!(strcmp(roomArray.array[i]->name, (char*) arg)))
-                return roomArray.array[i];
+        for(int i = 0; i < roomArray->size; i++)
+            if(!(strcmp(roomArray->array[i]->name, (char*) arg)))
+                return roomArray->array[i];
 
-    for(int i = 0; i < roomArray.size; i++)
-        if(roomArray.array[i]->id == *((Room_ID*) arg))
-            return roomArray.array[i];
+    for(int i = 0; i < roomArray->size; i++)
+        if(roomArray->array[i]->id == *((Room_ID*) arg))
+            return roomArray->array[i];
 
     return NULL;
 }

@@ -7,14 +7,16 @@ struct Room
 {
     char* name;
     Room_ID id;
-    struct Room** adjMainRooms;     // Array of priority adjascent rooms
-    struct Room** adjSecRooms;      // Array of secondary adjascent rooms    
+    struct Room** targetRoomsBonnie;     
+    struct Room** targetRoomsChica;
+    struct Room** targetRoomsFreddy;
+    struct Room** targetRoomsFoxy;
 }; typedef struct Room Room;
 
-void setRoomName(Room* room, char* name);
-void setAdjRooms(int nbr, Target_Flag flag, Room* room, ...);
+Room* createRoom(Room_ID id);
+void setRoomName(Room* room);
+void setTargetRooms(Target_Flag sec, Target_Flag flag, Room* room, ...);
 void destroyRoom(Room* room);
-Room* searchRoom(Search_Flag flag, void* arg);
 
 struct RoomArray
 {
@@ -22,7 +24,8 @@ struct RoomArray
     int size;
 }; typedef struct RoomArray RoomArray;
 
-void createRoomArray(RoomArray* array, int size);
-void destroyRoomArray(RoomArray* array);
+
+Room* searchRoom(RoomArray* roomArray, Search_Flag flag, void* arg);
+void destroyRoomArray(RoomArray* RoomArray);
 
 #endif
