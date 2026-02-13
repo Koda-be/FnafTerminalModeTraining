@@ -1,8 +1,6 @@
 .cache
-
+logs
 bin/*
 !bin/gamedata/
-
 objs
-
 compile_commands.json

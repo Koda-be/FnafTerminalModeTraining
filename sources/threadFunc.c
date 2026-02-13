@@ -1,23 +1,32 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
 #include <pthread.h>
 #include "threadFunc.h"
 #include "ressources.h"
 #include "room.h"
 #include "animatronic.h"
 
+pthread_mutex_t mutexMove = PTHREAD_MUTEX_INITIALIZER;
+
 void* GameThrFunc(void* argument)
 {
+    sigset_t mask;
+    sigemptyset(&mask);
+    sigaddset(&mask, SIGUSR1);
+    pthread_sigmask(SIG_SETMASK, &mask, NULL);
+
     char nightLevel = *((char*) argument);
     char* result = malloc(sizeof(char));
 
     RoomArray roomArray;
-    roomArray.array = calloc(11, sizeof(Room*));
+    roomArray.array = calloc(12, sizeof(Room*));
 
-    for(int i = 0; i < 11; i++)
+    printf("roomArray created\n");
+
+    for(int i = 0; i < 12; i++)
     {
         roomArray.array[i] = createRoom((Room_ID) i);
-        setRoomName(roomArray.array[i]);
     }
 
     setTargetRooms(MAIN, BONNIE, roomArray.array[STAGE], roomArray.array[MAINROOM]);
@@ -34,8 +43,7 @@ void* GameThrFunc(void* argument)
     setTargetRooms(SEC, CHICA, roomArray.array[TOILETS], roomArray.array[KITCHEN], roomArray.array[MAINROOM]);
     setTargetRooms(SEC, CHICA, roomArray.array[KITCHEN], roomArray.array[RIGHTCORR1], roomArray.array[MAINROOM]);
     setTargetRooms(SEC, CHICA, roomArray.array[RIGHTCORR2], roomArray.array[SECURITYROOM], roomArray.array[RIGHTCORR1]);
-    setTargetRooms(MAIN, MAIN, roomArray.array[SECURITYROOM], roomArray.array[STAGE]);
-
+    setTargetRooms(MAIN, CHICA, roomArray.array[SECURITYROOM], roomArray.array[STAGE]);
 
     setTargetRooms(MAIN, FREDDY, roomArray.array[STAGE], roomArray.array[MAINROOM]);
     setTargetRooms(MAIN, FREDDY, roomArray.array[MAINROOM], roomArray.array[TOILETS]);
@@ -53,10 +61,19 @@ void* GameThrFunc(void* argument)
 
     pthread_t bonnieThr, chicaThr, freddyThr, foxyThr;
 
-    pthread_create(&bonnieThr, NULL, AnimatronicThrFunc, (void*) createAnimatronic( BONNIE, 0.5, 15, roomArray.array[STAGE]));
-    pthread_create(&chicaThr, NULL, AnimatronicThrFunc, (void*) createAnimatronic(CHICA, 0.7, 15, roomArray.array[STAGE]));
-    pthread_create(&freddyThr, NULL, AnimatronicThrFunc, (void*) createAnimatronic(FREDDY, 1, 15, roomArray.array[STAGE]));
-    pthread_create(&foxyThr, NULL, AnimatronicThrFunc, (void*) createAnimatronic(FOXY, 1.2, 15, roomArray.array[PIRATECOVE]));
+    pthread_create(&bonnieThr, NULL, AnimatronicThrFunc, (void*) createAnimatronic( BONNIE, 0, 20, roomArray.array[STAGE]));
+    pthread_create(&chicaThr, NULL, AnimatronicThrFunc, (void*) createAnimatronic(CHICA, 0, 20, roomArray.array[STAGE]));
+    pthread_create(&freddyThr, NULL, AnimatronicThrFunc, (void*) createAnimatronic(FREDDY, 0, 20, roomArray.array[STAGE]));
+    pthread_create(&foxyThr, NULL, AnimatronicThrFunc, (void*) createAnimatronic(FOXY, 0, 20, roomArray.array[PIRATECOVE]));
+
+    Room *bonRes = NULL, *chiRes = NULL, *freRes = NULL, *foxRes = NULL;
+
+    pthread_join(bonnieThr, (void*) &bonRes);
+    pthread_join(chicaThr, (void*) &chiRes);
+    pthread_join(freddyThr, (void*) &freRes);
+    pthread_join(foxyThr, (void*) &foxRes);
+
+    printf("Final rooms:\nbo: %s\nch: %s\nfr: %s\nfo: %s\n", bonRes->name, chiRes->name, freRes->name, foxRes->name);
 
     pthread_exit((void*) result);
 }
@@ -65,11 +82,30 @@ void* AnimatronicThrFunc(void* argument)
 {
     Animatronic* animatronic = (Animatronic*) argument;
     
-    pthread_cleanup_push(reinitialize, (void*) animatronic);
+    //pthread_cleanup_push(reinitialize, (void*) animatronic);
 
-    printf("Animatronic thread successfully launched, animatronic: %s", animatronic->id);
+    printf("Animatronic thread successfully launched, animatronic: %s, %d\n", animatronic->id, animatronic->flag);
 
-    pthread_cleanup_pop(1);
+    sigset_t mask;
+    sigemptyset(&mask);
+    pthread_sigmask(SIG_SETMASK, &mask, NULL);
+
+    struct timespec timer;
+    timer.tv_sec = (int) animatronic->timer;
+    timer.tv_nsec = (animatronic->timer - (int) animatronic->timer)*1000000000;
+
+    while(1)
+    {
+        nanosleep(&timer, NULL);
+
+        pthread_mutex_lock(&mutexMove);
+        printf("%s entered move function\n", animatronic->id);
+        move(animatronic);
+        printf("%s exited move function\n", animatronic->id);
+        pthread_mutex_unlock(&mutexMove);
+    }
+
+    //pthread_cleanup_pop(1);
     
-    pthread_exit(NULL);
+    pthread_exit(animatronic->currRoom);
 }
