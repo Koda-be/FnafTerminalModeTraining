@@ -61,10 +61,10 @@ void* GameThrFunc(void* argument)
 
     pthread_t bonnieThr, chicaThr, freddyThr, foxyThr;
 
-    pthread_create(&bonnieThr, NULL, AnimatronicThrFunc, (void*) createAnimatronic( BONNIE, 0, 20, roomArray.array[STAGE]));
-    pthread_create(&chicaThr, NULL, AnimatronicThrFunc, (void*) createAnimatronic(CHICA, 0, 20, roomArray.array[STAGE]));
-    pthread_create(&freddyThr, NULL, AnimatronicThrFunc, (void*) createAnimatronic(FREDDY, 0, 20, roomArray.array[STAGE]));
-    pthread_create(&foxyThr, NULL, AnimatronicThrFunc, (void*) createAnimatronic(FOXY, 0, 20, roomArray.array[PIRATECOVE]));
+    pthread_create(&bonnieThr, NULL, AnimatronicThrFunc, (void*) createAnimatronic( BONNIE, 3.3, 15, roomArray.array[STAGE]));
+    pthread_create(&chicaThr, NULL, AnimatronicThrFunc, (void*) createAnimatronic(CHICA, 3.6, 15, roomArray.array[STAGE]));
+    pthread_create(&freddyThr, NULL, AnimatronicThrFunc, (void*) createAnimatronic(FREDDY, 5, 15, roomArray.array[STAGE]));
+    pthread_create(&foxyThr, NULL, AnimatronicThrFunc, (void*) createAnimatronic(FOXY, 6, 15, roomArray.array[PIRATECOVE]));
 
     Room *bonRes = NULL, *chiRes = NULL, *freRes = NULL, *foxRes = NULL;
 
