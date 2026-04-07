@@ -11,11 +11,13 @@ struct Room
     struct Room** targetRoomsChica;
     struct Room** targetRoomsFreddy;
     struct Room** targetRoomsFoxy;
+    char lDoor, rDoor;
+    char lLights, rLights;
 }; typedef struct Room Room;
 
 Room* createRoom(Room_ID id);
 void setRoomName(Room* room);
-void setTargetRooms(Target_Flag sec, Target_Flag flag, Room* room, ...);
+void setTargetRooms(Target_Flag sec, Anim_Flag flag, Room* room, ...);
 void destroyRoom(Room* room);
 
 struct RoomArray
@@ -25,7 +27,7 @@ struct RoomArray
 }; typedef struct RoomArray RoomArray;
 
 
-Room* searchRoom(RoomArray* roomArray, Search_Flag flag, void* arg);
-void destroyRoomArray(RoomArray* RoomArray);
+/*Room* searchRoom(RoomArray* roomArray, Search_Flag flag, void* arg);*/
+/*void destroyRoomArray(RoomArray* RoomArray);*/
 
 #endif

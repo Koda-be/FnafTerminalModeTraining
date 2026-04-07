@@ -116,30 +116,30 @@ void setRoomName(Room* room)
     }
 }
 
-void setTargetRooms(Target_Flag sec, Anim_Flag flag, Room* room, ...)
+void setTargetRooms(Target_Flag tFlag, Anim_Flag aFlag, Room* room, ...)
 {
     Room*** targetRooms = NULL;
 
-    switch(flag)
+    switch(aFlag)
     {
-        case BONNIE:
+        case bonnie:
             targetRooms = &(room->targetRoomsBonnie);
             break;
 
-        case CHICA:
+        case chica:
             targetRooms = &(room->targetRoomsChica);
             break;
         
-        case FREDDY:
+        case freddy:
             targetRooms = &(room->targetRoomsFreddy);
             break;
         
-        case FOXY:
+        case foxy:
             targetRooms = &(room->targetRoomsFoxy);
             break;
 
         default:
-            printf("Invalid flag in setTargetRooms(): %d", flag);
+            printf("Invalid flag in setTargetRooms(): %d", aFlag);
     }
     
     *targetRooms = malloc(2*(sizeof(Room*)));
@@ -149,7 +149,7 @@ void setTargetRooms(Target_Flag sec, Anim_Flag flag, Room* room, ...)
 
     (*targetRooms)[0] = va_arg(roomPtr, Room*);
 
-    if(sec == SEC)
+    if(tFlag == sec)
         (*targetRooms)[1] = va_arg(roomPtr, Room*);
 
     else 
@@ -160,9 +160,9 @@ void setTargetRooms(Target_Flag sec, Anim_Flag flag, Room* room, ...)
     return;
 }
 
-Room* searchRoom(RoomArray* roomArray, Search_Flag flag, void* arg)
+/*Room* searchRoom(RoomArray* roomArray, Search_Flag flag, void* arg)
 {
-    if(flag)
+    if(flag == NAME)
         for(int i = 0; i < roomArray->size; i++)
             if(!(strcmp(roomArray->array[i]->name, (char*) arg)))
                 return roomArray->array[i];
@@ -172,9 +172,9 @@ Room* searchRoom(RoomArray* roomArray, Search_Flag flag, void* arg)
             return roomArray->array[i];
 
     return NULL;
-}
+}*/
 
-void createRoomArray(RoomArray* roomArray, int size)
+/*void createRoomArray(RoomArray* roomArray, int size)
 {
     Room** array = roomArray->array;
     array= malloc((size+1)*sizeof(Room*));
@@ -185,4 +185,4 @@ void createRoomArray(RoomArray* roomArray, int size)
     }
 
     array[size] = NULL;
-}
+}*/

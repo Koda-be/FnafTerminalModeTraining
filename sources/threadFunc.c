@@ -6,88 +6,118 @@
 #include "ressources.h"
 #include "room.h"
 #include "animatronic.h"
+#include "global.h"
 
-pthread_mutex_t mutexMove = PTHREAD_MUTEX_INITIALIZER;
+extern RoomArray roomArray;
+extern pthread_mutex_t  mutexMove, 
+                        mutBon, 
+                        mutChi, 
+                        mutFre, 
+                        mutFox;
 
-void* GameThrFunc(void* argument)
+extern pthread_key_t keyAnim;
+
+void* PrepThrFunc(void* argument)
 {
+    printf("Prep started\n");
+
     sigset_t mask;
     sigemptyset(&mask);
     sigaddset(&mask, SIGUSR1);
     pthread_sigmask(SIG_SETMASK, &mask, NULL);
 
     char nightLevel = *((char*) argument);
-    char* result = malloc(sizeof(char));
 
-    RoomArray roomArray;
-    roomArray.array = calloc(12, sizeof(Room*));
+    printf("creating key\n");
+
+    pthread_key_create(&keyAnim, destroyAnimatronic);
+
+    roomArray.array = calloc(ARRAYSIZE, sizeof(Room*));
 
     printf("roomArray created\n");
 
-    for(int i = 0; i < 12; i++)
+    for(int i = 0; i < ARRAYSIZE; i++)
     {
         roomArray.array[i] = createRoom((Room_ID) i);
     }
 
-    setTargetRooms(MAIN, BONNIE, roomArray.array[STAGE], roomArray.array[MAINROOM]);
-    setTargetRooms(SEC, BONNIE, roomArray.array[MAINROOM], roomArray.array[LEFTCORR1], roomArray.array[REPAIRROOM]);
-    setTargetRooms(SEC, BONNIE, roomArray.array[REPAIRROOM], roomArray.array[MAINROOM], roomArray.array[STAGE]);
-    setTargetRooms(SEC, BONNIE, roomArray.array[LEFTCORR1], roomArray.array[LEFTCORR2], roomArray.array[LEFTCLOSET]);
-    setTargetRooms(SEC, BONNIE, roomArray.array[LEFTCLOSET], roomArray.array[LEFTCORR1], roomArray.array[MAINROOM]);
-    setTargetRooms(SEC, BONNIE, roomArray.array[LEFTCORR2], roomArray.array[SECURITYROOM], roomArray.array[LEFTCORR1]);
-    setTargetRooms(MAIN, BONNIE, roomArray.array[SECURITYROOM], roomArray.array[STAGE]);
+    setTargetRooms(main, bonnie, roomArray.array[STAGE], roomArray.array[MAINROOM]);
+    setTargetRooms(sec, bonnie, roomArray.array[MAINROOM], roomArray.array[LEFTCORR1], roomArray.array[REPAIRROOM]);
+    setTargetRooms(sec, bonnie, roomArray.array[REPAIRROOM], roomArray.array[MAINROOM], roomArray.array[STAGE]);
+    setTargetRooms(sec, bonnie, roomArray.array[LEFTCORR1], roomArray.array[LEFTCORR2], roomArray.array[LEFTCLOSET]);
+    setTargetRooms(sec, bonnie, roomArray.array[LEFTCLOSET], roomArray.array[LEFTCORR1], roomArray.array[MAINROOM]);
+    setTargetRooms(sec, bonnie, roomArray.array[LEFTCORR2], roomArray.array[SECURITYROOM], roomArray.array[LEFTCORR1]);
+    setTargetRooms(main, bonnie, roomArray.array[SECURITYROOM], roomArray.array[STAGE]);
 
-    setTargetRooms(MAIN, CHICA, roomArray.array[STAGE], roomArray.array[MAINROOM]);
-    setTargetRooms(SEC, CHICA, roomArray.array[MAINROOM], roomArray.array[RIGHTCORR1], roomArray.array[TOILETS]);
-    setTargetRooms(SEC, CHICA, roomArray.array[RIGHTCORR1], roomArray.array[RIGHTCORR2], roomArray.array[KITCHEN]);
-    setTargetRooms(SEC, CHICA, roomArray.array[TOILETS], roomArray.array[KITCHEN], roomArray.array[MAINROOM]);
-    setTargetRooms(SEC, CHICA, roomArray.array[KITCHEN], roomArray.array[RIGHTCORR1], roomArray.array[MAINROOM]);
-    setTargetRooms(SEC, CHICA, roomArray.array[RIGHTCORR2], roomArray.array[SECURITYROOM], roomArray.array[RIGHTCORR1]);
-    setTargetRooms(MAIN, CHICA, roomArray.array[SECURITYROOM], roomArray.array[STAGE]);
+    setTargetRooms(main, chica, roomArray.array[STAGE], roomArray.array[MAINROOM]);
+    setTargetRooms(sec, chica, roomArray.array[MAINROOM], roomArray.array[RIGHTCORR1], roomArray.array[TOILETS]);
+    setTargetRooms(sec, chica, roomArray.array[RIGHTCORR1], roomArray.array[RIGHTCORR2], roomArray.array[KITCHEN]);
+    setTargetRooms(sec, chica, roomArray.array[TOILETS], roomArray.array[KITCHEN], roomArray.array[MAINROOM]);
+    setTargetRooms(sec, chica, roomArray.array[KITCHEN], roomArray.array[RIGHTCORR1], roomArray.array[MAINROOM]);
+    setTargetRooms(sec, chica, roomArray.array[RIGHTCORR2], roomArray.array[SECURITYROOM], roomArray.array[RIGHTCORR1]);
+    setTargetRooms(main, chica, roomArray.array[SECURITYROOM], roomArray.array[STAGE]);
 
-    setTargetRooms(MAIN, FREDDY, roomArray.array[STAGE], roomArray.array[MAINROOM]);
-    setTargetRooms(MAIN, FREDDY, roomArray.array[MAINROOM], roomArray.array[TOILETS]);
-    setTargetRooms(MAIN, FREDDY, roomArray.array[TOILETS], roomArray.array[KITCHEN]);    
-    setTargetRooms(MAIN, FREDDY, roomArray.array[KITCHEN], roomArray.array[RIGHTCORR1]);
-    setTargetRooms(MAIN, FREDDY, roomArray.array[RIGHTCORR1], roomArray.array[RIGHTCORR2]);
-    setTargetRooms(MAIN, FREDDY, roomArray.array[RIGHTCORR2], roomArray.array[SECURITYROOM]);
-    setTargetRooms(MAIN, FREDDY, roomArray.array[SECURITYROOM], roomArray.array[RIGHTCORR2]);
+    setTargetRooms(main, freddy, roomArray.array[STAGE], roomArray.array[MAINROOM]);
+    setTargetRooms(main, freddy, roomArray.array[MAINROOM], roomArray.array[TOILETS]);
+    setTargetRooms(main, freddy, roomArray.array[TOILETS], roomArray.array[KITCHEN]);    
+    setTargetRooms(main, freddy, roomArray.array[KITCHEN], roomArray.array[RIGHTCORR1]);
+    setTargetRooms(main, freddy, roomArray.array[RIGHTCORR1], roomArray.array[RIGHTCORR2]);
+    setTargetRooms(main, freddy, roomArray.array[RIGHTCORR2], roomArray.array[SECURITYROOM]);
+    setTargetRooms(main, freddy, roomArray.array[SECURITYROOM], roomArray.array[RIGHTCORR2]);
 
-    setTargetRooms(MAIN, FOXY, roomArray.array[PIRATECOVE], roomArray.array[LEFTCORR1]);
-    setTargetRooms(MAIN, FOXY, roomArray.array[LEFTCORR1], roomArray.array[SECURITYROOM]);
-    setTargetRooms(MAIN, FOXY, roomArray.array[SECURITYROOM], roomArray.array[PIRATECOVE]);
+    setTargetRooms(main, foxy, roomArray.array[PIRATECOVE], roomArray.array[LEFTCORR1]);
+    setTargetRooms(main, foxy, roomArray.array[LEFTCORR1], roomArray.array[SECURITYROOM]);
+    setTargetRooms(main, foxy, roomArray.array[SECURITYROOM], roomArray.array[PIRATECOVE]);
 
-    printf("main game thread successfully launched: %d\n", nightLevel);
+    printf("Prep finished\n");
 
-    pthread_t bonnieThr, chicaThr, freddyThr, foxyThr;
+    pthread_t gameThr;
 
-    pthread_create(&bonnieThr, NULL, AnimatronicThrFunc, (void*) createAnimatronic( BONNIE, 3.3, 15, roomArray.array[STAGE]));
-    pthread_create(&chicaThr, NULL, AnimatronicThrFunc, (void*) createAnimatronic(CHICA, 3.6, 15, roomArray.array[STAGE]));
-    pthread_create(&freddyThr, NULL, AnimatronicThrFunc, (void*) createAnimatronic(FREDDY, 5, 15, roomArray.array[STAGE]));
-    pthread_create(&foxyThr, NULL, AnimatronicThrFunc, (void*) createAnimatronic(FOXY, 6, 15, roomArray.array[PIRATECOVE]));
+    pthread_create(&gameThr, NULL, GameThrFunc, NULL);
+
+    pthread_exit((void*) gameThr);
+}
+
+void* GameThrFunc(void* argument)
+{
+    printf("gamethread: %lu\n", pthread_self());
+
+    sigset_t mask;
+    sigemptyset(&mask);
+    pthread_sigmask(SIG_SETMASK, &mask, NULL);
+
+    Animatronic     *animBonnie = createAnimatronic(bonnie, 3.3, 15, roomArray.array[STAGE]), 
+                    *animChica= createAnimatronic(chica, 3.6, 15, roomArray.array[STAGE]), 
+                    *animFreddy= createAnimatronic(freddy, 5, 15, roomArray.array[STAGE]),
+                    *animFoxy= createAnimatronic(foxy, 6, 15, roomArray.array[PIRATECOVE]);
 
     Room *bonRes = NULL, *chiRes = NULL, *freRes = NULL, *foxRes = NULL;
 
-    pthread_join(bonnieThr, (void*) &bonRes);
-    pthread_join(chicaThr, (void*) &chiRes);
-    pthread_join(freddyThr, (void*) &freRes);
-    pthread_join(foxyThr, (void*) &foxRes);
+    pthread_join(animBonnie->tid, (void*) &bonRes);
+    pthread_join(animChica->tid, (void*) &chiRes);
+    pthread_join(animFreddy->tid, (void*) &freRes);
+    pthread_join(animFoxy->tid, (void*) &foxRes);
 
     printf("Final rooms:\nbo: %s\nch: %s\nfr: %s\nfo: %s\n", bonRes->name, chiRes->name, freRes->name, foxRes->name);
 
-    pthread_exit((void*) result);
+    pthread_key_delete(keyAnim);
+
+    pthread_exit(NULL);
 }
 
 void* AnimatronicThrFunc(void* argument)
 {
     Animatronic* animatronic = (Animatronic*) argument;
+
+    pthread_setspecific(keyAnim, animatronic);
     
-    //pthread_cleanup_push(reinitialize, (void*) animatronic);
+    pthread_cleanup_push(reinitialize, (void*) animatronic);
 
     printf("Animatronic thread successfully launched, animatronic: %s, %d\n", animatronic->id, animatronic->flag);
 
     sigset_t mask;
     sigemptyset(&mask);
+    sigaddset(&mask, SIGUSR1);
     pthread_sigmask(SIG_SETMASK, &mask, NULL);
 
     struct timespec timer;
@@ -100,12 +130,17 @@ void* AnimatronicThrFunc(void* argument)
 
         pthread_mutex_lock(&mutexMove);
         printf("%s entered move function\n", animatronic->id);
-        move(animatronic);
+        animatronic->move();
         printf("%s exited move function\n", animatronic->id);
         pthread_mutex_unlock(&mutexMove);
     }
 
-    //pthread_cleanup_pop(1);
+    pthread_cleanup_pop(1);
     
     pthread_exit(animatronic->currRoom);
+}
+
+void* ClockThrFunc(void* arg)
+{
+    pthread_exit(NULL);
 }

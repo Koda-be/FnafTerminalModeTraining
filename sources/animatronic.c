@@ -1,3 +1,4 @@
+#include <pthread.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -5,6 +6,9 @@
 #include "room.h"
 #include "animatronic.h"
 #include "ressources.h"
+#include "threadFunc.h"
+
+extern pthread_key_t keyAnim;
 
 Animatronic* createAnimatronic(Anim_Flag flag, Anim_Timer timer, Anim_Difficulty difficulty, Room* startRoom)
 {
@@ -12,10 +16,10 @@ Animatronic* createAnimatronic(Anim_Flag flag, Anim_Timer timer, Anim_Difficulty
 
     switch(flag)
     {
-        case BONNIE: strcpy(animatronic->id, "Bo"); break;
-        case CHICA: strcpy(animatronic->id, "Ch"); break;
-        case FREDDY: strcpy(animatronic->id, "Fr"); break;
-        case FOXY: strcpy(animatronic->id, "Fo"); break;
+        case bonnie: strcpy(animatronic->id, "Bo"); break;
+        case chica: strcpy(animatronic->id, "Ch"); break;
+        case freddy: strcpy(animatronic->id, "Fr"); break;
+        case foxy: strcpy(animatronic->id, "Fo"); break;
     }
     
     animatronic->timer = timer;
@@ -24,6 +28,10 @@ Animatronic* createAnimatronic(Anim_Flag flag, Anim_Timer timer, Anim_Difficulty
 
     animatronic->currRoom = startRoom;
     animatronic->startRoom = startRoom;
+
+    animatronic->move = _moveNormal;
+
+    pthread_create(&(animatronic->tid), NULL, AnimatronicThrFunc, (void*) animatronic);
 
     printf("Created animatronic: ID = %s, room = %s, timer = %f\n", animatronic->id, animatronic->currRoom->name, animatronic->timer);
 
@@ -35,35 +43,32 @@ int checkMove(Animatronic* animatronic)
     return((rand()%20)<animatronic->difficulty);
 }
 
- void move(Animatronic* animatronic)
+ void _moveNormal(void)
 {
+    Animatronic* animatronic = (Animatronic*) pthread_getspecific(keyAnim);
+
     if(checkMove(animatronic))
     {
         Room** targetRoom = NULL;
 
         switch(animatronic->flag)
         {
-            case BONNIE:
+            case bonnie:
             {
                 targetRoom = animatronic->currRoom->targetRoomsBonnie; 
                 break;
             } 
 
-            case CHICA:
+            case chica:
             {
                 targetRoom = animatronic->currRoom->targetRoomsChica; 
                 break;
-            } 
-            case FREDDY:
+            }
+
+            default:
             {
-                targetRoom = animatronic->currRoom->targetRoomsFreddy; 
-                break;
-            } 
-            case FOXY:
-            {
-                targetRoom = animatronic->currRoom->targetRoomsFoxy; 
-                break;
-            } 
+                printf("Unavailable flag");
+            }
         }
 
         printf("%s Next possible rooms: %s, %s\n", animatronic->id, (targetRoom[0] != NULL ? targetRoom[0]->name : "NULL"), (targetRoom[1] != NULL ? targetRoom[1]->name : "NULL"));
@@ -76,23 +81,23 @@ int checkMove(Animatronic* animatronic)
 
         switch(animatronic->flag)
         {
-            case BONNIE:
+            case bonnie:
             {
                 targetRoom = animatronic->currRoom->targetRoomsBonnie; 
                 break;
             } 
 
-            case CHICA:
+            case chica:
             {
                 targetRoom = animatronic->currRoom->targetRoomsChica; 
                 break;
             } 
-            case FREDDY:
+            case freddy:
             {
                 targetRoom = animatronic->currRoom->targetRoomsFreddy; 
                 break;
             } 
-            case FOXY:
+            case foxy:
             {
                 targetRoom = animatronic->currRoom->targetRoomsFoxy; 
                 break;
@@ -109,9 +114,4 @@ int checkMove(Animatronic* animatronic)
 void reinitialize(void* arg)
 {
     //((Animatronic*) arg)->currRoom = ((Animatronic*) arg)->startRoom;
-}
-
-void destroyAnimatronic(Animatronic* animatronic)
-{
-    free(animatronic);
 }
